@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Connection pooling URL for production
+  url = env("POSTGRES_PRISMA_URL")
+
+  // Direct connection URL for migrations (use without connection pooling)
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model User {
+  id             Int      @id @default(autoincrement()) @map("Id")          // Map "id" to "Id"
+  username       String   @map("username")                               // Map "username" to "username"
+  hashedPassword String   @unique @map("hashed_password")                // Map "hashedPassword" to "hashed_password"
+  email          String?  @map("email")                                 // Map "email" to "email"
+  createdAt      DateTime @default(now()) @map("created_at")             // Map "createdAt" to "created_at"
+  updatedAt      DateTime @updatedAt @map("updated_at")                  // Map "updatedAt" to "updated_at"
+
+  @@map("nc_7jy6___users")  // Maps the model to the NocoDB-specific table name
+}

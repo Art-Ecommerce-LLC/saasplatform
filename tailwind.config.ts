@@ -8,9 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+      screens: {
+        'custom-md': '829px', // Custom Breakpoint Header
+        'custom-520': '520px', // Custom Breakpoint Footer
       },
     },
   },
