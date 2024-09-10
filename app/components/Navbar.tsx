@@ -1,55 +1,61 @@
 "use client";
 
 import React, { useState } from 'react';
-import Image from 'next/image';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 const Navbar: React.FC = () => {
+    const { data: session, status } = useSession(); // Get session and authentication status
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
         <nav className="flex items-center justify-between bg-white p-4 shadow relative z-20">
             <div className="flex items-center z-30">
-                <a href="/">
-                    {/* <Image 
-                    src={`/logo_dark.png`} 
-                    alt="Logo" 
-                    width={190}
-                    height={190}
-                    style={{height: 'auto'}}
-                    priority={true}
-                    quality={70} /> */}
+                <Link href="/">
                     <span className="text-2xl font-bold text-gray-800">SaaS</span>
-                </a>
+                </Link>
             </div>
-            
-           {/* Desktop Menu */}
-           <div className="hidden custom-md:flex items-center space-x-4 custom-md:space-x-8 mr-8">
-                <a
+
+            {/* Desktop Menu */}
+            <div className="hidden custom-md:flex items-center space-x-4 custom-md:space-x-8 mr-8">
+                <Link
                     href="/"
                     className="text-gray-800 hover:bg-[var(--nav-bg-color)] hover:text-[var(--hover-text-color)] transition-colors duration-300 ease-in-out px-4 py-2 rounded-md"
                 >
                     Home
-                </a>
-                <a
+                </Link>
+                <Link
                     href="/about"
                     className="text-gray-800 hover:bg-[var(--nav-bg-color)] hover:text-[var(--hover-text-color)] transition-colors duration-300 ease-in-out px-4 py-2 rounded-md"
                 >
                     About
-                </a>
-                <a
+                </Link>
+                <Link
                     href="/pricing"
                     className="text-gray-800 hover:bg-[var(--nav-bg-color)] hover:text-[var(--hover-text-color)] transition-colors duration-300 ease-in-out px-4 py-2 rounded-md"
                 >
-                    Contact
-                </a>
-                <a
-                    href="/signin"
-                    className="text-gray-800 hover:bg-[var(--nav-bg-color)] hover:text-[var(--hover-text-color)] transition-colors duration-300 ease-in-out px-4 py-2 rounded-md"
-                >
-                    Sign-In
-                </a>
+                    Pricing
+                </Link>
+
+                {/* Conditional rendering based on session */}
+                {status === "authenticated" ? (
+                    <Link
+                        href="/admin"
+                        className="text-gray-800 hover:bg-[var(--nav-bg-color)] hover:text-[var(--hover-text-color)] transition-colors duration-300 ease-in-out px-4 py-2 rounded-md"
+                    >
+                        Dashboard
+                    </Link>
+                ) : (
+                    <Link
+                        href="/sign-in"
+                        className="text-gray-800 hover:bg-[var(--nav-bg-color)] hover:text-[var(--hover-text-color)] transition-colors duration-300 ease-in-out px-4 py-2 rounded-md"
+                    >
+                        Sign In
+                    </Link>
+                )}
             </div>
 
+            {/* Mobile Menu Button */}
             <div className="custom-md:hidden flex items-center z-30">
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -78,30 +84,40 @@ const Navbar: React.FC = () => {
             {/* Mobile Menu */}
             {isMobileMenuOpen && (
                 <div className="fixed inset-0 top-[70px] w-full h-[calc(100%-70px)] bg-[var(--navbar-color)] z-999 flex flex-col justify-center items-center overflow-hidden custom-md:hidden">
-                    <a
+                    <Link
                         href="/"
                         className="w-full text-center text-[var(--navbar-text-color)] text-xl py-4 border-b border-black last:border-none hover:bg-[var(--navbar-hover-background-color)] hover:text-white transition-colors duration-300 ease-in-out"
                     >
                         Home
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                         href="/about"
                         className="w-full text-center text-[var(--navbar-text-color)] text-xl py-4 border-b border-black last:border-none hover:bg-[var(--navbar-hover-background-color)] hover:text-white transition-colors duration-300 ease-in-out"
                     >
                         About
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                         href="/pricing"
                         className="w-full text-center text-[var(--navbar-text-color)] text-xl py-4 border-b border-black last:border-none hover:bg-[var(--navbar-hover-background-color)] hover:text-white transition-colors duration-300 ease-in-out"
                     >
                         Pricing
-                    </a>
-                    <a
-                        href="/signin"
-                        className="w-full text-center text-[var(--navbar-text-color)] text-xl py-4 border-b border-black last:border-none hover:bg-[var(--navbar-hover-background-color)] hover:text-white transition-colors duration-300 ease-in-out"
-                    >
-                        Sign-In
-                    </a>
+                    </Link>
+
+                    {status === "authenticated" ? (
+                        <Link
+                            href="/admin"
+                            className="w-full text-center text-[var(--navbar-text-color)] text-xl py-4 border-b border-black hover:bg-[var(--navbar-hover-background-color)] hover:text-white transition-colors duration-300 ease-in-out"
+                        >
+                            Dashboard
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/sign-in"
+                            className="w-full text-center text-[var(--navbar-text-color)] text-xl py-4 border-b border-black hover:bg-[var(--navbar-hover-background-color)] hover:text-white transition-colors duration-300 ease-in-out"
+                        >
+                            Sign In
+                        </Link>
+                    )}
                 </div>
             )}
         </nav>

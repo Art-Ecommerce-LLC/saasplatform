@@ -1,33 +1,15 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient();
-
-/**
- * Connect to PostgreSQL via Prisma.
- * Prisma automatically manages connection pooling and database connections.
- */
-export async function connectToDB() {
-  try {
-    await prisma.$connect();  // Explicitly connect to the database if needed
-    console.log('Connected to PostgreSQL via Prisma');
-  } catch (error) {
-    console.error('Failed to connect to PostgreSQL via Prisma:', error);
-    throw error;
-  }
+const prismaClientSingleton = () => {
+  return new PrismaClient()
 }
 
-/**
- * Close the Prisma connection gracefully.
- * Typically handled automatically but can be useful for testing or cleanup.
- */
-export async function closeConnection() {
-  try {
-    await prisma.$disconnect();  // Explicitly close the database connection
-    console.log('Prisma connection closed');
-  } catch (error) {
-    console.error('Failed to close Prisma connection:', error);
-  }
-}
+declare const globalThis: {
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
+} & typeof global;
 
-// Export Prisma client for use in the app
-export { prisma as db };
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
+
+if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
+
+export const db = prisma;
