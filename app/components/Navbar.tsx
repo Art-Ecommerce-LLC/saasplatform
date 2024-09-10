@@ -89,7 +89,7 @@ const Navbar: React.FC = () => {
                         Pricing
                     </Link>
 
-                   <Link className={buttonVariants()} href='sign-in'>
+                   <Link className={buttonVariants()} href='/sign-in'>
                         Sign In
                     </Link>
                 </div>
