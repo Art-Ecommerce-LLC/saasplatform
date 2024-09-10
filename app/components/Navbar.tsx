@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { buttonVariants } from './ui/button';
+import UserDashboard from './UserDashboard';
 
+const Navbar: React.FC<{ session: any }> = ({ session }) => {
 
-const Navbar: React.FC = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
@@ -36,9 +37,13 @@ const Navbar: React.FC = () => {
                 >
                     Pricing
                 </Link>
-                <Link className={buttonVariants()} href='sign-in'>
-                    Sign In
-                </Link>
+                {session?.user ? (
+                        <UserDashboard />
+                    ) : (
+                        <Link className={buttonVariants()} href='/sign-in'>
+                            Sign in
+                        </Link>
+                )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -88,10 +93,18 @@ const Navbar: React.FC = () => {
                     >
                         Pricing
                     </Link>
-
-                   <Link className={buttonVariants()} href='/sign-in'>
-                        Sign In
-                    </Link>
+                    {session?.user ? (
+                    <div className="align-center pt-4"
+                    >
+                        <UserDashboard />
+                    </div>
+                    ) : (
+                    <div className="align-center">
+                        <Link className={buttonVariants()} href='/sign-in'>
+                            Sign in
+                        </Link>
+                        </div>
+                    )}
                 </div>
             )}
         </nav>

@@ -1,11 +1,10 @@
 import Link from 'next/link';
-import { buttonVariants } from './ui/button';
 import { HandMetal } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/lib/auth';
-import UserAccountNav from './UserAccountnav';
+import SignOutIn from './SignOutIn';
 
-const Navbar = async () => {
+const NavbarAcess = async () => {
 
     const session = await getServerSession(authOptions);
 
@@ -15,19 +14,10 @@ const Navbar = async () => {
         <Link href='/'>
             <HandMetal />
         </Link>
-        {session?.user ? (
-            <UserAccountNav />
-        ) : (
-            <Link className={buttonVariants()} href='/sign-in'>
-                Sign in
-            </Link>
-        )}
-        <Link className={buttonVariants()} href='/sign-in'>
-            Sign in
-        </Link>
+        <SignOutIn />
         </div>
     </div>
     );
 };
 
-export default Navbar;
+export default NavbarAcess;
