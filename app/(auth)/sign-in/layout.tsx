@@ -1,9 +1,9 @@
-import './styles/globals.css';  // Add your global styles here
-import Navbar from './components/Navbar'; // Import the Navbar
-import Footer from './components/Footer';
+import '@/app/styles/globals.css';  // Add your global styles here
+import NavbarAccess from '@/app/components/NavbarAccess'; // Import the Navbar
+// import FooterAccess from '@/app/components/FooterAccess';
 import { Inter } from 'next/font/google';
 import { Toaster } from '@/app/components/ui/toaster'; // Import Toaster
-import Provider  from './components/Provider'; // Import Provider
+import Provider  from '@/app/components/Provider'; // Import Provider
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -14,14 +14,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Wrap the whole application in SessionProvider */}
         <Provider>
           <nav>
-            <Navbar />
+            <NavbarAccess />
           </nav>
           <main className="flex-grow flex items-center justify-center bg-white">
             {children}
           </main>
           
           <footer className="bg-white">
-            <Footer />
+            {/* <Footer /> */}
           </footer>
           <Toaster />
         </Provider>

@@ -25,12 +25,6 @@ const Footer: React.FC = () => {
                                 Pricing
                             </Link>
                         </li>
-                        <li className="text-gray-500 mx-2 hidden custom-520:inline">|</li>
-                        <li className="flex items-center">
-                            <Link href="/signin" className="text-gray-300 hover:text-white transition duration-300">
-                                Sign-In
-                            </Link>
-                        </li>
                     </ul>
                 </nav>
                 <p className="text-gray-500">&copy; 2024 Art Ecommerce, LLC.</p>

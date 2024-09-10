@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { buttonVariants } from './ui/button';
+
 
 const Navbar: React.FC = () => {
-    const { data: session, status } = useSession(); // Get session and authentication status
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
@@ -36,23 +36,9 @@ const Navbar: React.FC = () => {
                 >
                     Pricing
                 </Link>
-
-                {/* Conditional rendering based on session */}
-                {status === "authenticated" ? (
-                    <Link
-                        href="/admin"
-                        className="text-gray-800 hover:bg-[var(--nav-bg-color)] hover:text-[var(--hover-text-color)] transition-colors duration-300 ease-in-out px-4 py-2 rounded-md"
-                    >
-                        Dashboard
-                    </Link>
-                ) : (
-                    <Link
-                        href="/sign-in"
-                        className="text-gray-800 hover:bg-[var(--nav-bg-color)] hover:text-[var(--hover-text-color)] transition-colors duration-300 ease-in-out px-4 py-2 rounded-md"
-                    >
-                        Sign In
-                    </Link>
-                )}
+                <Link className={buttonVariants()} href='sign-in'>
+                    Sign In
+                </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -103,21 +89,9 @@ const Navbar: React.FC = () => {
                         Pricing
                     </Link>
 
-                    {status === "authenticated" ? (
-                        <Link
-                            href="/admin"
-                            className="w-full text-center text-[var(--navbar-text-color)] text-xl py-4 border-b border-black hover:bg-[var(--navbar-hover-background-color)] hover:text-white transition-colors duration-300 ease-in-out"
-                        >
-                            Dashboard
-                        </Link>
-                    ) : (
-                        <Link
-                            href="/sign-in"
-                            className="w-full text-center text-[var(--navbar-text-color)] text-xl py-4 border-b border-black hover:bg-[var(--navbar-hover-background-color)] hover:text-white transition-colors duration-300 ease-in-out"
-                        >
-                            Sign In
-                        </Link>
-                    )}
+                   <Link className={buttonVariants()} href='sign-in'>
+                        Sign In
+                    </Link>
                 </div>
             )}
         </nav>

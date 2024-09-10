@@ -16,7 +16,7 @@ import { Button } from '../ui/button';
 import Link from 'next/link';
 import GoogleSignInButton from '../GoogleSignInButton';
 import { useRouter } from 'next/navigation';
-
+import { useToast } from "@/app/components/hooks/use-toast"
 
 const FormSchema = z
   .object({
@@ -34,6 +34,7 @@ const FormSchema = z
   });
 
 const SignUpForm = () => {
+  const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -62,7 +63,11 @@ const SignUpForm = () => {
       router.push('/sign-in');
     }
     else {
-      console.error('Registration failed');
+      toast({
+        title: "Error",
+        description: "Something Went Wrong",
+        variant: "destructive",
+      })
     }
   };
 
