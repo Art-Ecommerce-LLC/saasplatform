@@ -1,4 +1,3 @@
-import '@/app/styles/globals.css';  // Add your global styles here
 import NavbarAccess from '@/app/components/NavbarAccess'; // Import the Navbar
 // import FooterAccess from '@/app/components/FooterAccess';
 import { Inter } from 'next/font/google';

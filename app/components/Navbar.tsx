@@ -9,6 +9,14 @@ const Navbar: React.FC<{ session: any }> = ({ session }) => {
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+    // If the mobile menu iks open lock overflow to prevent scrolling
+    if (isMobileMenuOpen) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = 'auto';
+    }
+
+
     return (
         <nav className="flex items-center justify-between bg-white p-4 shadow relative z-20">
             <div className="flex items-center z-30">
