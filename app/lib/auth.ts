@@ -2,7 +2,6 @@ import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { db } from "./db"
-import { compare } from "bcrypt" // Switch to bcryptjs
 import GoogleProvider from "next-auth/providers/google"
 
 export const authOptions: NextAuthOptions = {
@@ -12,7 +11,7 @@ export const authOptions: NextAuthOptions = {
         strategy: "jwt",
     },
     pages : {
-        signIn : "/sign-in"
+        signIn : "/sign-in",
     },
     providers: [
         GoogleProvider({
@@ -23,57 +22,59 @@ export const authOptions: NextAuthOptions = {
           name: "Credentials",
 
           credentials: {
-            email: { label: "Email", type: "text", placeholder: "john@gmail.com" },
-            password: { label: "Password", type: "password" },
-            "2fa_key": { label: "2FA Key", type: "text" }
+            "2FA_key": { label: "2FA key", type: "text" }
           },
           async authorize(credentials) {
-
-            if (!credentials?.email || !credentials?.password) {
-                return null
-            }
             
-            const existingUser = await db.user.findUnique({
-                where: {email: credentials?.email}
-            });
-            if(!existingUser) {
-                return null
-            }
+              if (!credentials) {
+                  return null;
+              }
+              try {
+                const validOTP = await fetch(`${process.env.NEXTAUTH_URL}/api/emailmfa`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      otp: credentials["2FA_key"],
+                  }),
+              });
+              const validOTPData = await validOTP.json();
+                            
 
-            if(existingUser.password) {
-              const passwordMatch = await compare(credentials.password, existingUser.password);
-              if (!passwordMatch) {
+              if (validOTPData?.error) {
                   return null
               }
-            }
-
-            return {
-                id: `${existingUser.id}`,
-                username: existingUser.username,
-                email: existingUser.email
-                
-            }
+              return {
+                  id: validOTPData.user.id,
+                  email: validOTPData.user.email,
+                  username: validOTPData.user.username,
+                  mfaVerified: true, 
+              }
+              } catch (error) {
+                  return null;
+              }
           }
         })
       ],
       callbacks: {
         async jwt({token, user}) {
-            console.log(token, user)
             if (user){
                 return {
                     ...token,
-                    username: user.username
+                    username: user.username,
+                    mfaVerified: user.mfaVerified
                 }
             }
              return token
         },
         async session({session, token}) {
-
           return {
             ...session,
             user: {
                 ...session.user,
-                username: token.username
+                username: token.username,
+                mfaVerified: token.mfaVerified
             }
           }
         }

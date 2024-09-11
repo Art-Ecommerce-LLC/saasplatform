@@ -46,6 +46,7 @@ model User {
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
   image         String?
+  mfaVerified   Boolean   @default(false) // Added field for MFA verification status
   accounts      Account[]
   sessions      Session[]
  
@@ -59,4 +60,12 @@ model VerificationToken {
  
   @@unique([identifier, token])
   @@map("verificationtokens")
+}
+
+model OTP {
+  id        String   @id @default(cuid())  // Unique identifier
+  email     String   @unique               // The user's email address (unique)
+  otp       String                         // The OTP value
+  expiresAt DateTime                       // Expiration time for the OTP
+  createdAt DateTime @default(now())       // Timestamp of creation
 }

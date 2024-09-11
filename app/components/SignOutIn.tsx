@@ -9,7 +9,7 @@ const SignOutIn = async () => {
     const session = await getServerSession(authOptions);
     return (
         <div>
-            {session?.user ? (
+            {session?.user.mfaVerified ? (
                 <UserAccountNav />
             ) : (
                 <Link className={buttonVariants()} href='/sign-in'>

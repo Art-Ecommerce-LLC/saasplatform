@@ -21,9 +21,13 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { email, username, password } = userSchema.parse(body);
 
+        // Normalize email and username to lowercase
+        const normalizedEmail = email.toLowerCase();
+        const normalizedUsername = username.toLowerCase();
+
         // Check if email already exists
         const existingUserByEmail = await db.user.findUnique({
-            where: {email:email}
+            where: {email:normalizedEmail}
         })
 
         if (existingUserByEmail) {
@@ -32,7 +36,7 @@ export async function POST(req: Request) {
 
         // Check if email already exists
         const existingUserByUsername = await db.user.findUnique({
-            where: {username : username}
+            where: {username : normalizedUsername}
         })
 
         if (existingUserByUsername) {
@@ -43,8 +47,8 @@ export async function POST(req: Request) {
         const hashedPassword = await hash(password, 10);
         const newUser = await db.user.create({
             data: {
-                email, 
-                username, 
+                email: normalizedEmail, 
+                username: normalizedUsername, 
                 password: hashedPassword
             }
         })

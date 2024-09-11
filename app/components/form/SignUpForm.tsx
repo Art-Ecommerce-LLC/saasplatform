@@ -48,14 +48,18 @@ const SignUpForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+
+    const normalizedUsername = values.username.toLowerCase();
+    const normalizedEmail = values.email.toLowerCase();
+
     const response = await fetch('/api/user', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify( {
-        username: values.username,
-        email: values.email,
+        username: normalizedUsername,
+        email: normalizedEmail,
         password: values.password,
       }),
     })
@@ -65,8 +69,9 @@ const SignUpForm = () => {
     else {
       toast({
         title: "Error",
-        description: "Something Went Wrong",
+        description: "Username or Email already exists",
         variant: "destructive",
+        className: "fixed bottom-4 right-4 z-50 w-3/5 sm:max-w-sm md:max-w-sd"
       })
     }
   };

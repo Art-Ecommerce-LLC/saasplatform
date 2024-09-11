@@ -1,11 +1,11 @@
 import SignInForm from '@/app/components/form/SignInForm';
 
-const page = () => {
+const SignInPage = () => {
   return (
-    <div className='w-full'>
+    <div className='w-full' style={{ maxWidth: '400px' }}>
       <SignInForm />
     </div>
   );
 };
 
-export default page;
+export default SignInPage;

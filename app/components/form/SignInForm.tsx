@@ -15,7 +15,6 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import GoogleSignInButton from '../GoogleSignInButton';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/app/components/hooks/use-toast"
 
@@ -38,22 +37,33 @@ const SignInForm = () => {
     },
   });
 
+
+
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    const signInData = await signIn('credentials', {
-      email: values.email,
-      password: values.password,
-      redirect: false,
+    const signInData = await fetch('/api/validate-credentials', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: values.email,
+        password: values.password,
+      }),
     });
-    
-    if (signInData?.error) {
+
+    const signInDataJson = await signInData.json();
+
+    if (signInDataJson?.error) {
       toast({
         title: "Error",
         description: "Something Went Wrong",
         variant: "destructive",
-      })
+        className: `
+        fixed bottom-4 right-4 z-50 w-3/5 sm:max-w-sm md:max-w-sd
+      `,
+    });
     } else {
-      router.refresh();
-      router.push('/admin');
+      router.push('/email-mfa');
     }
   };
 

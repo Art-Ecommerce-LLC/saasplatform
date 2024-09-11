@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { buttonVariants } from './ui/button';
 import UserDashboard from './UserDashboard';
@@ -9,13 +9,19 @@ const Navbar: React.FC<{ session: any }> = ({ session }) => {
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // If the mobile menu iks open lock overflow to prevent scrolling
-    if (isMobileMenuOpen) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = 'auto';
-    }
+    // Run this only in client-side
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
 
+        // Clean up when component is unmounted or menu state changes
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [isMobileMenuOpen]); // Run when `isMobileMenuOpen` changes
 
     return (
         <nav className="flex items-center justify-between bg-white p-4 shadow relative z-20">
@@ -45,7 +51,7 @@ const Navbar: React.FC<{ session: any }> = ({ session }) => {
                 >
                     Pricing
                 </Link>
-                {session?.user ? (
+                {session?.user.mfaVerified ? (
                         <UserDashboard />
                     ) : (
                         <Link className={buttonVariants()} href='/sign-in'>
