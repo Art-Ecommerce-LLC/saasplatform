@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
 import { hash} from "bcrypt";
 import * as z from "zod";
+import { headers } from 'next/headers';
+import nodemailer from 'nodemailer';
+import jwt from 'jsonwebtoken';
 
+
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 // Define a schema for input Validation
 const userSchema = z
@@ -15,6 +20,16 @@ const userSchema = z
       .min(8, 'Password must have than 8 characters'),
 })
 
+const IP = (): string => {
+    const FALLBACK_IP_ADDRESS = '0.0.0.0';
+    const forwardedFor = headers().get('x-forwarded-for');
+    
+    if (forwardedFor) {
+      return forwardedFor.split(',')[0] ?? FALLBACK_IP_ADDRESS;
+    }
+    
+    return headers().get('x-real-ip') ?? FALLBACK_IP_ADDRESS;
+  };
 
 export async function POST(req: Request) {
     try {
@@ -42,20 +57,54 @@ export async function POST(req: Request) {
         if (existingUserByUsername) {
             return NextResponse.json({user:null, message:"User with this username already exists"}, {status:409})
         }
+
+        // Get the user ip address
+        const ipAddress = IP();
+        // Generate a session token (JWT) that includes the userId and email
+  
         
         // Create a new user
         const hashedPassword = await hash(password, 10);
+        const emailLinkTime = new Date();
         const newUser = await db.user.create({
             data: {
                 email: normalizedEmail, 
                 username: normalizedUsername, 
-                password: hashedPassword
+                password: hashedPassword,
+                ipAddress: ipAddress,
+                updatedAt: new Date(),
+                createdAt: new Date(),
+                emailLinkTime: emailLinkTime
             }
         })
+        const sessionToken = jwt.sign(
+            { userId: newUser.id, email: newUser.email, emailLinkTime: emailLinkTime },
+            JWT_SECRET,
+            { expiresIn: '15m' } // Token will expire in 15 minutes
+        );
+        // Send email verification link
 
-        const {password:newUserPassword,...rest} = newUser;
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASSWORD
+            }
+            });
 
-        return NextResponse.json({user:rest, message:"User created successfully"}, {status:201})
+        const verificationUrl = `${process.env.NEXTAUTH_URL}/api/verify-email?sessionToken=${sessionToken}`;
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: normalizedEmail,
+            subject: "Email Verification",
+            text: `Click here to verify your email: ${verificationUrl}`,
+            html: `<p>Click <a href="${verificationUrl}">here</a> to verify your email</p>`,
+            });
+    
+
+        // const {password:newUserPassword, ...rest} = newUser;
+
+        return NextResponse.json({sessionToken:sessionToken, message:"User created successfully"}, {status:201})
     } catch (error) {
         return NextResponse.json({message:"Something Went Wrong"}, {status:500})
     }

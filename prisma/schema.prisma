@@ -45,8 +45,12 @@ model User {
   password      String?
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
+  emailLinkTime DateTime? @map("email_link_time")
   image         String?
-  mfaVerified   Boolean   @default(false) // Added field for MFA verification status
+  mfaVerified   Boolean?   @default(false) @map("mfa_verified")
+  ipAddress     String?   @map("ip_address") 
+  updatedAt     DateTime? @map("last_updated") 
+  createdAt     DateTime? @map("created_at") 
   accounts      Account[]
   sessions      Session[]
  

@@ -63,16 +63,18 @@ const SignUpForm = () => {
         password: values.password,
       }),
     })
-    if (response.ok) {
-      router.push('/sign-in');
-    }
-    else {
+    const responseData = await response.json();
+    if (responseData?.error) {
       toast({
         title: "Error",
-        description: "Username or Email already exists",
+        description: "Something Went Wrong",
         variant: "destructive",
         className: "fixed bottom-4 right-4 z-50 w-3/5 sm:max-w-sm md:max-w-sd"
       })
+    }
+    else {
+      const sessionToken = responseData.sessionToken;
+      router.push(`/verify-notice?sessionToken=${sessionToken}`);
     }
   };
 
