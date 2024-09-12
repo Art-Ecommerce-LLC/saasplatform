@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { decrypt } from '@/app/lib/utils'; // Adjust the path to your crypto file
 import { db } from '@/app/lib/db'; // Adjust the path to your database
 
-const JWT_SECRET = process.env.JWT_SECRET!;
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,16 +13,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/invalid-verification`);
     }
 
-    // Verify the token
-    let decoded;
-    try {
-      decoded = jwt.verify(sessionToken, JWT_SECRET);
-    } catch (err) {
-      return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/invalid-verification`);
-    }
 
-    // Extract the userId and email from the decoded token
-    const { userId, email, emailLinkTime } = decoded as { userId: string; email: string, emailLinkTime: string };
+    // Decrypt the data
+    const decryptedData = decrypt(decodeURIComponent(sessionToken));
+    const { userId, email, emailLinkTime } = JSON.parse(decryptedData);
 
     // Find the user in the database
     const user = await db.user.findUnique({
@@ -61,6 +54,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/email-verified`);
   } catch (error) {
+    console.log(error);
     NextResponse.redirect(`${process.env.NEXTAUTH_URL}/invalid-verification`);
   }
 }

@@ -4,7 +4,7 @@ import { db } from '@/app/lib/db'; // Adjust this path to your db
 
 export async function POST(req: NextRequest) {
   try {
-    const { otp } = await req.json();
+    const { otp, sessionToken } = await req.json();
 
     // Ensure OTP is provided
     if (!otp) {
@@ -24,11 +24,6 @@ export async function POST(req: NextRequest) {
 
     // Retrieve the email associated with the OTP
     const email = storedOtp?.email;
-
-    // Fetch the user from the database based on the email
-    const user = await db.user.findUnique({
-      where: { email },
-    });
 
 
     if (!otp || !email) {
@@ -57,7 +52,8 @@ export async function POST(req: NextRequest) {
     // Clean up OTP after use
     await db.oTP.delete({ where: { email } });
     
-    return NextResponse.json({ user }, { status: 200 });
+
+    return NextResponse.json({sessionToken: sessionToken, OTP: otp}, { status: 200 });
 } catch (error) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
 }

@@ -13,9 +13,9 @@ import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from "@/app/components/hooks/use-toast"
+import { signIn } from 'next-auth/react';
 
 const FormSchema = z.object({
     OTP: z
@@ -28,6 +28,7 @@ const FormSchema = z.object({
 
 const MFAOTPForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams(); // Hook to access URL parameters
   const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -36,19 +37,31 @@ const MFAOTPForm = () => {
     },
   });
 
+  const sessionToken = searchParams.get('sessionToken'); // Get the sessionToken from the URL
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
 
-    // Sign in with OTP
-    // get session email and password
-
-    
-    const signInData = await signIn('credentials', {
-        redirect: false,
-        "2FA_key": values.OTP,
+    // Send the OTP and session Token to the server in a post request to validate the OTP
+    const validateOTP = await fetch('/api/validate-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        OTP: values.OTP,
+        sessionToken: sessionToken,
+      }),
     });
 
-    
-    if (signInData?.error) {
+    const signInData = await validateOTP.json();
+
+    const signInAuth = await signIn('credentials', {
+      redirect: false,
+      sessionToken: signInData.sessionToken,
+      "2FA_key": signInData.OTP,
+    });
+
+
+    if (signInAuth?.error) {
       toast({
         title: "Error",
         description: "OTP Failed",

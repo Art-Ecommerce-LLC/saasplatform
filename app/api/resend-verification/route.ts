@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/app/lib/db'; // Adjust the path to your database
 import nodemailer from 'nodemailer';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET!; // Make sure this is set in your environment
+import {encrypt, decrypt } from '@/app/lib/utils'; // Adjust the path to your crypto file
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,16 +12,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Email is required' }, { status: 400 });
     }
 
-    let decoded;
-    try {
-      decoded = jwt.verify(sessionToken, JWT_SECRET);
-    } catch (err) {
-      return NextResponse.json({ message: 'Invalid or expired token' }, { status: 400 });
-    }
-
-    // Extract the userId and email from the decoded token
-    const { userId, email } = decoded as { userId: string; email: string };
-    email
+    // Decrypt the data
+    const decryptedData = decrypt(decodeURIComponent(sessionToken));
+    const { userId, email } = JSON.parse(decryptedData);
     const emailLinkTime = new Date();
 
     await db.user.update({
@@ -55,14 +46,9 @@ export async function POST(req: NextRequest) {
 
     // Reset the emailLinkTime in the sessionToken
 
-    const newSessionToken = jwt.sign(
-      { userId, email, emailLinkTime },
-      JWT_SECRET,
-      { expiresIn: '15m' }
-    );
+    const newSessionToken = encrypt(JSON.stringify({ userId, email, emailLinkTime }));
+    const verificationUrl = `${process.env.NEXTAUTH_URL}/api/verify-email?sessionToken=${encodeURIComponent(newSessionToken)}`;
 
-
-    const verificationUrl = `${process.env.NEXTAUTH_URL}/api/verify-email?sessionToken=${newSessionToken}`;
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,

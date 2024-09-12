@@ -73,8 +73,9 @@ const SignUpForm = () => {
       })
     }
     else {
-      const sessionToken = responseData.sessionToken;
-      router.push(`/verify-notice?sessionToken=${sessionToken}`);
+      const encryptedToken = responseData.encryptedToken;
+      const pushUrl = `/verify-notice?sessionToken=${encodeURIComponent(encryptedToken)}`;
+      router.push(pushUrl);
     }
   };
 

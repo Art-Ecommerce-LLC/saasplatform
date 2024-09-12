@@ -4,10 +4,7 @@ import { hash} from "bcrypt";
 import * as z from "zod";
 import { headers } from 'next/headers';
 import nodemailer from 'nodemailer';
-import jwt from 'jsonwebtoken';
-
-
-const JWT_SECRET = process.env.JWT_SECRET!;
+import { encrypt } from "@/app/lib/utils";
 
 // Define a schema for input Validation
 const userSchema = z
@@ -77,12 +74,12 @@ export async function POST(req: Request) {
                 emailLinkTime: emailLinkTime
             }
         })
-        const sessionToken = jwt.sign(
-            { userId: newUser.id, email: newUser.email, emailLinkTime: emailLinkTime },
-            JWT_SECRET,
-            { expiresIn: '15m' } // Token will expire in 15 minutes
-        );
-        // Send email verification link
+        // Encrypt the userId and email
+        const sensitiveData = JSON.stringify({ userId: newUser.id, email: newUser.email, emailLinkTime: emailLinkTime });
+        const encryptedData = encrypt(sensitiveData);
+
+        // Send the encrypted data in the verification email link
+        const verificationUrl = `${process.env.NEXTAUTH_URL}/api/verify-email?sessionToken=${encodeURIComponent(encryptedData)}`;
 
         const transporter = nodemailer.createTransport({
             service: "gmail",
@@ -92,20 +89,17 @@ export async function POST(req: Request) {
             }
             });
 
-        const verificationUrl = `${process.env.NEXTAUTH_URL}/api/verify-email?sessionToken=${sessionToken}`;
         await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+            from: process.env.SMTP_USER,
             to: normalizedEmail,
-            subject: "Email Verification",
-            text: `Click here to verify your email: ${verificationUrl}`,
-            html: `<p>Click <a href="${verificationUrl}">here</a> to verify your email</p>`,
+            subject: 'Email Verification',
+            text: `Please verify your email by clicking this link: ${verificationUrl}`,
+            html: `<p>Click <a href="${verificationUrl}">here</a> to verify your email.</p>`,
             });
-    
 
-        // const {password:newUserPassword, ...rest} = newUser;
-
-        return NextResponse.json({sessionToken:sessionToken, message:"User created successfully"}, {status:201})
+        return NextResponse.json({sessionToken: encryptedData, message:"User created successfully"}, {status:201})
     } catch (error) {
+        console.log(error)
         return NextResponse.json({message:"Something Went Wrong"}, {status:500})
     }
 }

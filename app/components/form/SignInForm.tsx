@@ -64,9 +64,9 @@ const SignInForm = () => {
       });
       // check if signInDataJson.user.emailVerified is null
     } else if (!signInDataJson.user.emailVerified) {
-      router.push(`/verify-notice?sessionToken=${signInDataJson.sessionToken}`);
+      router.push(`/verify-notice?sessionToken=${encodeURIComponent(signInDataJson.sessionToken)}`);
     } else {
-      router.push('/email-mfa');
+      router.push(`/email-mfa?sessionToken=${encodeURIComponent(signInDataJson.sessionToken)}`);
     }
   };
 
